@@ -320,7 +320,7 @@
 //  SAROS GOURMET — CHATBOT CON GEMINI AI
 //  Reemplazá TU_API_KEY_AQUI con tu clave de Google AI Studio
 // ============================================================
-const GEMINI_API_KEY = 'AIzaSyDBEkyR75VPIJQQ-EarHZs7gqoavlNn_is';
+const GEMINI_API_KEY = 'AIzaSyDBEkyR75VPIJQQ-EarHZs7gqoav1Nn_is';
 
 const SAROS_CONTEXT = `
 Sos el asistente virtual de SAROS GOURMET, una empresa familiar argentina de especias y productos gourmet fundada en 2010.
@@ -483,7 +483,7 @@ async function sendMessage(text) {
 
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
