@@ -317,10 +317,10 @@
 
 <script>
 // ============================================================
-//  SAROS GOURMET — CHATBOT CON GEMINI AI
-//  Reemplazá TU_API_KEY_AQUI con tu clave de Google AI Studio
+//  SAROS GOURMET — CHATBOT CON GROQ AI
+//  Reemplazá TU_API_KEY_AQUI con tu clave de console.groq.com
 // ============================================================
-const GEMINI_API_KEY = 'AIzaSyDZlwzIirk1Ou_DxWT1MO_3dtYg-bNDXJ0';
+const GROQ_API_KEY = 'TU_API_KEY_AQUI';
 
 const SAROS_CONTEXT = `
 Sos el asistente virtual de SAROS GOURMET, una empresa familiar argentina de especias y productos gourmet fundada en 2010.
@@ -388,7 +388,7 @@ Para contacto: hola@sarosgourmet.com.ar o WhatsApp +5411-60586345
 // Estado del chat
 let messages = [];
 let isLoading = false;
-const API_KEY_SET = GEMINI_API_KEY !== 'TU_API_KEY_AQUI';
+const API_KEY_SET = GROQ_API_KEY !== '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';
 
 // Elementos DOM
 const btn     = document.getElementById('saros-chat-btn');
@@ -470,30 +470,33 @@ async function sendMessage(text) {
     return;
   }
 
-  // Build conversation for Gemini
-  const geminiMessages = [];
-  const history = messages.slice(0, -1); // exclude last user message
+  // Build conversation for Groq
+  const groqMessages = [
+    { role: 'system', content: SAROS_CONTEXT }
+  ];
+  const history = messages.slice(0, -1);
   for (const m of history) {
-    geminiMessages.push({
-      role: m.role === 'bot' ? 'model' : 'user',
-      parts: [{ text: m.text }]
+    groqMessages.push({
+      role: m.role === 'bot' ? 'assistant' : 'user',
+      content: m.text
     });
   }
-  geminiMessages.push({ role: 'user', parts: [{ text: text }] });
+  groqMessages.push({ role: 'user', content: text });
 
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+      'https://api.groq.com/openai/v1/chat/completions',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${GROQ_API_KEY}`
+        },
         body: JSON.stringify({
-          system_instruction: { parts: [{ text: SAROS_CONTEXT }] },
-          contents: geminiMessages,
-          generationConfig: {
-            maxOutputTokens: 350,
-            temperature: 0.7,
-          }
+          model: 'llama-3.1-8b-instant',
+          messages: groqMessages,
+          max_tokens: 350,
+          temperature: 0.7,
         })
       }
     );
@@ -502,7 +505,7 @@ async function sendMessage(text) {
 
     if (data.error) throw new Error(data.error.message);
 
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text
+    const reply = data.choices?.[0]?.message?.content
       || 'No pude generar una respuesta. Intentá de nuevo.';
 
     hideTyping();
@@ -510,7 +513,7 @@ async function sendMessage(text) {
 
   } catch (err) {
     hideTyping();
-    console.error('Gemini error:', err);
+    console.error('Groq error:', err);
     addMessage('bot', 'Hubo un problema técnico 😕 Podés contactarnos directamente por WhatsApp: **+5411-60586345**');
   }
 
